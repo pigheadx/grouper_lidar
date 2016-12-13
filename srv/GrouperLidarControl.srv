@@ -1,0 +1,6 @@
+# Server is grouper_lidar
+# change the state of depth map capture
+
+string command
+---
+bool return
