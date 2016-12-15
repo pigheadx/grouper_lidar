@@ -3,4 +3,4 @@
 
 string command
 ---
-bool return
+bool ans
