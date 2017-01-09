@@ -63,8 +63,8 @@ class GrouperLidar
   float ranges_matrix_[SCAN_LINES][LIDAR_POINTS];
   float intensities_matrix_[SCAN_LINES][LIDAR_POINTS];
 
-  uint16_t ranges_img[OUTPUT_ROW][OUTPUT_COL];
-  uint16_t intensities_img[OUTPUT_ROW][OUTPUT_COL];
+  uint8_t ranges_img[OUTPUT_ROW][OUTPUT_COL];
+  uint8_t intensities_img[OUTPUT_ROW][OUTPUT_COL];
 
   uint32_t msg_seq;
 
