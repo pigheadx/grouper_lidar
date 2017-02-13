@@ -34,9 +34,10 @@ bool GrouperLidar::grouperLidarLoop(void)
       if(motorReachGoal())
       {
         LogLidar();
+        output1Frame();
         if(present_scan_line_>=SCAN_LINES-1)
         {
-          output1Frame();
+          //output1Frame();
           operating_state_=CCW;
         }
         else
@@ -54,9 +55,10 @@ bool GrouperLidar::grouperLidarLoop(void)
       if(motorReachGoal())
       {
         LogLidar();
+        output1Frame();
         if(present_scan_line_<=0)
         {
-          output1Frame();
+          //output1Frame();
           operating_state_=CW;
         }
         else
@@ -131,12 +133,8 @@ void GrouperLidar::LogLidar()
   scan_position_matrix_[present_scan_line_] = motor_present_position_;
   for(int i=0; i<OUTPUT_COL; i++)
   {
-    ranges_img[present_scan_line_][i]=int(ranges_matrix_[present_scan_line_][(LIDAR_POINTS/2)+LIDAR_STEP*((OUTPUT_COL/2)-i)]*256/5);
-    const double intensity_temp = intensities_matrix_[present_scan_line_][(LIDAR_POINTS/2)+LIDAR_STEP*((OUTPUT_COL/2)-i)]*256./5000.;
-    if(intensity_temp<256.)
-      intensities_img[present_scan_line_][i]=(int)intensity_temp;
-    else
-      intensities_img[present_scan_line_][i]=255;
+    ranges_img[present_scan_line_][i]=ranges_matrix_[present_scan_line_][(LIDAR_POINTS/2)+LIDAR_STEP*((OUTPUT_COL/2)-i)];
+    intensities_img[present_scan_line_][i]=intensities_matrix_[present_scan_line_][(LIDAR_POINTS/2)+LIDAR_STEP*((OUTPUT_COL/2)-i)];
   }
 }
 
@@ -148,18 +146,18 @@ void GrouperLidar::output1Frame()
   depthmap_msg.header.frame_id = "depthmap";
   depthmap_msg.height = OUTPUT_ROW;
   depthmap_msg.width = OUTPUT_COL;
-  depthmap_msg.encoding = "mono8";
+  depthmap_msg.encoding = "32FC1";
   depthmap_msg.is_bigendian = false;
-  depthmap_msg.step = OUTPUT_COL*sizeof(uint8_t);
+  depthmap_msg.step = OUTPUT_COL*sizeof(float);
   depthmap_msg.data.resize(OUTPUT_ROW*depthmap_msg.step);
-  for(int i=0; i<OUTPUT_ROW; i++)
-  {
-    for(int j=0; j<OUTPUT_COL; j++)
-    {
-      depthmap_msg.data[i*depthmap_msg.step+j] = ranges_img[i][j];
-    }
-  }
-//  memcpy(&depthmap_msg.data[0], &ranges_img[0][0], OUTPUT_ROW*depthmap_msg.step);
+//  for(int i=0; i<OUTPUT_ROW; i++)
+//  {
+//    for(int j=0; j<OUTPUT_COL; j++)
+//    {
+//      depthmap_msg.data[i*depthmap_msg.step+j] = ranges_img[i][j];
+//    }
+//  }
+  memcpy(&depthmap_msg.data[0], &ranges_img[0][0], OUTPUT_ROW*depthmap_msg.step);
   grouper_depthmap_.publish(depthmap_msg);
 
   sensor_msgs::Image intensity_msg;  
@@ -168,18 +166,18 @@ void GrouperLidar::output1Frame()
   intensity_msg.header.frame_id = "intensity";
   intensity_msg.height = OUTPUT_ROW;
   intensity_msg.width = OUTPUT_COL;
-  intensity_msg.encoding = "mono8";
+  intensity_msg.encoding = "32FC1";
   intensity_msg.is_bigendian = false;
-  intensity_msg.step = OUTPUT_COL*sizeof(uint8_t);
+  intensity_msg.step = OUTPUT_COL*sizeof(float);
   intensity_msg.data.resize(OUTPUT_ROW*intensity_msg.step);
-  for(int i=0; i<OUTPUT_ROW; i++)
-  {
-    for(int j=0; j<OUTPUT_COL; j++)
-    {
-      intensity_msg.data[i*intensity_msg.step+j] = intensities_img[i][j];
-    }
-  }
-//  memcpy(&intensity_msg.data[0], &intensities_img[0][0], OUTPUT_ROW*intensity_msg.step);
+//  for(int i=0; i<OUTPUT_ROW; i++)
+//  {
+//    for(int j=0; j<OUTPUT_COL; j++)
+//    {
+//      intensity_msg.data[i*intensity_msg.step+j] = intensities_img[i][j];
+//    }
+//  }
+  memcpy(&intensity_msg.data[0], &intensities_img[0][0], OUTPUT_ROW*intensity_msg.step);
   grouper_intensity_.publish(intensity_msg);
 
   sensor_msgs::PointCloud2 pc_msg;
